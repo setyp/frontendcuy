@@ -3,25 +3,31 @@ import { Container, Row, Col, Table, Button, Modal } from "react-bootstrap";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
-
+const token = localStorage.getItem('token');
 function Jurusan() {
+  console.log(token);
   const [jrs, setJrsn] = useState([]);
   const [show, setShow] = useState(false);
   const [namaJurusan, setNamaJurusan] = useState("");
   const [validation, setValidation] = useState({});
   const navigate = useNavigate();
-
+  
   useEffect(() => {
-    fetchData();
+      fetchData(); 
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async () => {  
     try {
-      const response = await axios.get("http://localhost:3000/");
-      const data = await response.data.data;
-      setJrsn(data);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response1 = await axios.get('http://192.168.0.102:3000/mhs',{headers});
+      const response2 = await axios.get('http://192.168.0.102:3000/jurusan',{headers});
+      const data2 = response2.data.data;
+      setJrsn(data2);
     } catch (error) {
-      console.error("Kesalahan: ", error);
+      // Tangani kesalahan permintaan data
+      console.error('Gagal mengambil data:', error);
     }
   };
 
@@ -39,7 +45,7 @@ function Jurusan() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:3000/jurusan", {
+      await axios.post("http://192.168.0.102:3000/jurusan", {
         nama_jurusan: namaJurusan,
       });
       navigate("/jrsn");
@@ -86,7 +92,7 @@ function Jurusan() {
     }
 
     try {
-      await axios.patch(`http://localhost:3000/jurusan/${editData.id_j}`, {
+      await axios.patch(`http://192.168.0.102:3000/jurusan/${editData.id_j}`, {
         nama_jurusan: editData.nama_jurusan,
       });
 
@@ -103,7 +109,7 @@ function Jurusan() {
     console.log("Trying to delete data with ID:", id_j);
 
     axios
-      .delete(`http://localhost:3000/jurusan/${id_j}`)
+      .delete(`http://192.168.0.102:3000/jurusan/${id_j}`)
       .then((response) => {
         console.log('Data berhasil dihapus');
         const updatedJrs = jrs.filter((item) => item.id_j !== id_j);

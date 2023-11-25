@@ -3,8 +3,10 @@ import { Container, Row, Col, Table, Button, Modal } from "react-bootstrap";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+const token = localStorage.getItem('token');
 
 function Mahasiswa() {
+  console.log(token);
   const [mhs, setMhs] = useState([]);
   const [jrs, setJrsn] = useState([]);
   const [show, setShow] = useState(false);
@@ -15,23 +17,27 @@ function Mahasiswa() {
   const [swa_foto, setSwaFoto] = useState(null);
   const [validation, setValidation] = useState({});
   const navigate = useNavigate();
-  const url = "http://localhost:3000/static/";
-
+  const url = "http://192.168.0.102:3000/static/";
+  
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+      
     try {
-      const response1 = await axios.get("http://localhost:3000/mahasiswa");
-      const data1 = await response1.data.data;
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response1 = await axios.get('http://192.168.0.102:3000/mhs',{headers});
+      const response2 = await axios.get('http://192.168.0.102:3000/jurusan',{headers});
+      const data1 = response1.data.data;
+      const data2 = response2.data.data;
       setMhs(data1);
-
-      const response2 = await axios.get("http://localhost:3000/");
-      const data2 = await response2.data.data;
       setJrsn(data2);
     } catch (error) {
-      console.error("Kesalahan: ", error);
+      // Tangani kesalahan permintaan data
+      console.error('Gagal mengambil data:', error);
     }
   };
 
@@ -75,7 +81,7 @@ function Mahasiswa() {
     formData.append("swa_foto", swa_foto);
 
     try {
-      await axios.post("http://localhost:3000/upload", formData, {
+      await axios.post("http://192.168.0.102:3000/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -146,7 +152,7 @@ function Mahasiswa() {
     }
   
     try {
-      await axios.patch(`http://localhost:3000/update/${editData.id_m}`, formData, {
+      await axios.patch(`http://192.168.0.102:3000/update/${editData.id_m}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -166,7 +172,7 @@ function Mahasiswa() {
     console.log("Trying to delete data with ID:", id_m);
     
     axios
-      .delete(`http://localhost:3000/delete/${id_m}`)
+      .delete(`http://192.168.0.102:3000/delete/${id_m}`)
       .then((response) => {
         console.log('Data berhasil dihapus');
         const updatedMhs = mhs.filter((item) => item.id_m !== id_m);
